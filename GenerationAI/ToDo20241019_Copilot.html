@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TODOアプリケーション</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f0f8ff; color: #333; }
+        #addButton, #shareButton { margin: 10px; padding: 10px; font-size: 18px; }
+        #todoList { margin-top: 20px; }
+        .todoItem { display: flex; align-items: center; margin: 5px 0; padding: 10px; border: 1px solid #ccc; background-color: #e6f7ff; }
+        .todoItem.overdue { background-color: #ffcccc; }
+        .todoTitle { flex-grow: 1; margin-left: 10px; font-size: 18px; }
+        .todoDeadline { margin-left: 10px; font-size: 18px; }
+        .complete { margin-right: 10px; }
+    </style>
+</head>
+<body>
+    <button id="addButton">追加</button>
+    <button id="shareButton">共有</button>
+    <div id="todoList"></div>
+
+    <script>
+        const addButton = document.getElementById('addButton');
+        const shareButton = document.getElementById('shareButton');
+        const todoList = document.getElementById('todoList');
+
+        addButton.addEventListener('click', () => {
+            const todoItem = document.createElement('div');
+            todoItem.classList.add('todoItem');
+
+            const completeCheck = document.createElement('input');
+            completeCheck.type = 'checkbox';
+            completeCheck.classList.add('complete');
+            completeCheck.addEventListener('change', () => {
+                todoTitle.style.textDecoration = completeCheck.checked ? 'line-through' : 'none';
+            });
+
+            const todoTitle = document.createElement('input');
+            todoTitle.type = 'text';
+            todoTitle.classList.add('todoTitle');
+            todoTitle.placeholder = 'TODOタイトル';
+
+            const todoDeadline = document.createElement('input');
+            todoDeadline.type = 'date';
+            todoDeadline.classList.add('todoDeadline');
+            todoDeadline.addEventListener('change', () => {
+                const currentDate = new Date().toISOString().split('T')[0];
+                todoItem.classList.toggle('overdue', todoDeadline.value < currentDate);
+            });
+
+            todoItem.appendChild(completeCheck);
+            todoItem.appendChild(todoTitle);
+            todoItem.appendChild(todoDeadline);
+            todoList.appendChild(todoItem);
+
+            todoItem.draggable = true;
+            todoItem.addEventListener('dragstart', () => {
+                todoItem.classList.add('dragging');
+            });
+            todoItem.addEventListener('dragend', () => {
+                todoItem.classList.remove('dragging');
+            });
+
+            todoList.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                const dragging = document.querySelector('.dragging');
+                const afterElement = getDragAfterElement(todoList, e.clientY);
+                if (afterElement == null) {
+                    todoList.appendChild(dragging);
+                } else {
+                    todoList.insertBefore(dragging, afterElement);
+                }
+            });
+
+            function getDragAfterElement(container, y) {
+                const draggableElements = [...container.querySelectorAll('.todoItem:not(.dragging)')];
+
+                return draggableElements.reduce((closest, child) => {
+                    const box = child.getBoundingClientRect();
+                    const offset = y - box.top - box.height / 2;
+                    if (offset < 0 && offset > closest.offset) {
+                        return { offset: offset, element: child };
+                    } else {
+                        return closest;
+                    }
+                }, { offset: Number.NEGATIVE_INFINITY }).element;
+            }
+
+            todoItem.addEventListener('touchstart', (e) => {
+                todoItem.classList.add('dragging');
+                e.targetTouches[0].preventDefault();
+            });
+
+            todoItem.addEventListener('touchend', () => {
+                todoItem.classList.remove('dragging');
+            });
+
+            todoItem.addEventListener('touchmove', (e) => {
+                const touchLocation = e.targetTouches[0];
+                const dragging = document.querySelector('.dragging');
+                const afterElement = getDragAfterElement(todoList, touchLocation.clientY);
+                if (afterElement == null) {
+                    todoList.appendChild(dragging);
+                } else {
+                    todoList.insertBefore(dragging, afterElement);
+                }
+            });
+        });
+
+        shareButton.addEventListener('click', () => {
+            const shareUrl = window.location.href;
+            navigator.clipboard.writeText(shareUrl).then(() => {
+                alert('URLをクリップボードにコピーしました');
+            });
+        });
+    </script>
+</body>
+</html>

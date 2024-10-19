@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TODOリストアプリ</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="header">
+        <button id="addBtn">TODO追加</button>
+        <button id="shareBtn">共有</button>
+    </div>
+    <div id="todoList" class="todo-list"></div>
+
+    <template id="todoItemTemplate">
+        <div class="todo-item">
+            <input type="checkbox" class="complete-checkbox">
+            <input type="text" class="todo-title" placeholder="TODOを入力">
+            <input type="date" class="due-date">
+        </div>
+    </template>
+
+    <script src="script.js"></script>
+</body>
+</html>
